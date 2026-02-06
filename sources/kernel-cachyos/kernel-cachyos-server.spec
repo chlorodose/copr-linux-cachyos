@@ -128,6 +128,8 @@ Source2:        https://raw.githubusercontent.com/Frogging-Family/linux-tkg/mast
 Source10:       https://github.com/NVIDIA/open-gpu-kernel-modules/archive/%{_nv_ver}/%{_nv_pkg}.tar.gz
 %endif
 
+Source1000:     https://evilpiepirate.org/bcachefs-tools/bcachefs-tools-1.36.0.tar.zst
+
 Patch0:         %{_patch_src}/all/0001-cachyos-base-all.patch
 
 %if %{_build_lto}
@@ -144,6 +146,15 @@ Patch10:        %{_patch_src}/misc/nvidia/0001-Enable-atomic-kernel-modesetting-
 %prep
 %setup -q %{?SOURCE10:-b 10} -n linux-%{_tarkver}
 %autopatch -p1 -v -M 9
+rm -rf fs/bcachefs
+mkdir -p fs/bcachefs
+tar -C fs/bcachefs --zstd --strip-components=2 -xf "%{SOURCE1000}" "$(basename "%{SOURCE1000}" ".tar.zst")/libbcachefs"
+if ! grep -q "fs/bcachefs/Kconfig" "fs/Kconfig"; then
+    sed -i '/source "fs\/btrfs\/Kconfig"/a source "fs/bcachefs/Kconfig"' "fs/Kconfig"
+fi
+if ! grep -q "bcachefs/" "fs/Makefile"; then
+    sed -i '/obj-$(CONFIG_BTRFS_FS).*+= btrfs\//a obj-$(CONFIG_BCACHEFS_FS) += bcachefs/' "fs/Makefile"
+fi
 
     cp %{SOURCE1} .config
 
@@ -161,6 +172,9 @@ Patch10:        %{_patch_src}/misc/nvidia/0001-Enable-atomic-kernel-modesetting-
 
     # Disable PREEMP
     scripts/config -d PREEMPT_DYNAMIC -d PREEMPT -d PREEMPT_VOLUNTARY -d PREEMPT_LAZY -e PREEMPT_NONE
+
+    # Enable bcachefs
+    scripts/config -m BCACHEFS_FS -e BCACHEFS_QUOTA -e BCACHEFS_ERASURE_CODING -e BCACHEFS_SIX_OPTIMISTIC_SPIN
 
     case %{_hz_tick} in
         100|250|300|500|600|750|1000)
