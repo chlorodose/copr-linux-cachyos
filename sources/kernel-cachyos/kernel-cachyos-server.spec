@@ -510,3 +510,7 @@ Recommends:     xorg-x11-drv-nvidia >= %{_nv_ver}
 %endif
 
 %files
+
+%changelog
+* Fri Feb 06 2026 Chlorodose <chlorodose@chlorodose.me>
+- Patch bcachefs
