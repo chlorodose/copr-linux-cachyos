@@ -145,7 +145,6 @@ Patch10:        %{_patch_src}/misc/nvidia/0001-Enable-atomic-kernel-modesetting-
 
 %prep
 %setup -q %{?SOURCE10:-b 10} -n linux-%{_tarkver}
-%autopatch -p1 -v -M 9
 rm -rf fs/bcachefs
 mkdir -p fs/bcachefs
 tar -C fs/bcachefs --zstd --strip-components=2 -xf "%{SOURCE1000}" "$(basename "%{SOURCE1000}" ".tar.zst")/libbcachefs"
@@ -214,7 +213,6 @@ fi
 cd %{_builddir}/%{_nv_pkg}/kernel-open
 %patch -P 10 -p1
 cd ..
-%autopatch -p1 -v -m 11 -M 19
 %endif
 
 %build
