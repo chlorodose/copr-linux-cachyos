@@ -27,7 +27,7 @@
 
 # Builds the kernel with clang and enables
 # ThinLTO
-%define _build_lto 0
+%define _build_lto 1
 
 # Builds nvidia-open kernel modules with
 # the kernel
@@ -47,14 +47,14 @@
 # Valid values: 100, 250, 300, 500, 600, 750 and 1000
 # An invalid value will not fail and continue to use
 # 1000Hz tickrate
-%define _hz_tick 300
+%define _hz_tick 1000
 
 # Defines the x86_64 ISA level used
 # to compile the kernel
 # Valid values are 1-4
 # An invalid value will continue and use
 # x86_64_v3
-%define _x86_64_lvl 2
+%define _x86_64_lvl 4
 
 # Define variables for directory paths
 # to be used during packaging
@@ -70,19 +70,19 @@
 
 %define _module_args KERNEL_UNAME=%{_kver} IGNORE_PREEMPT_RT_PRESENCE=1 SYSSRC=%{_builddir}/linux-%{_tarkver} SYSOUT=%{_builddir}/linux-%{_tarkver}
 
-Name:           kernel-cachyos-server%{?_lto_args:-lto}
+Name:           kernel-cachyos-server
 Summary:        Linux %{?_lto_args:+ LTO }EEVDF scheduler Kernel by CachyOS targeted for Servers workloads
 Version:        %{_basekver}.%{_stablekver}
-Release:        cachyserver1%{?_lto_args:.lto}%{?dist}
+Release:        cachyserver1%{?dist}
 License:        GPL-2.0-only
 URL:            https://cachyos.org
 
 Requires:       kernel-core-uname-r = %{_kver}
 Requires:       kernel-modules-uname-r = %{_kver}
 Requires:       kernel-modules-core-uname-r = %{_kver}
-Provides:       kernel-cachyos-server%{?_lto_args:-lto} > 6.12.9-cbrt1.0%{?_lto_args:.lto}%{?dist}
+Provides:       kernel-cachyos-server > 6.12.9-cbrt1.0%{?_lto_args:.lto}%{?dist}
 Provides:       installonlypkg(kernel)
-Obsoletes:      kernel-cachyos-server%{?_lto_args:-lto} <= 6.12.9-cbrt1.0%{?_lto_args:.lto}%{?dist}
+Obsoletes:      kernel-cachyos-server <= 6.12.9-cbrt1.0%{?_lto_args:.lto}%{?dist}
 
 BuildRequires:  bc
 BuildRequires:  bison
@@ -140,8 +140,6 @@ Patch2:         %{_patch_src}/misc/dkms-clang.patch
 Patch10:        %{_patch_src}/misc/nvidia/0001-Enable-atomic-kernel-modesetting-by-default.patch
 %endif
 
-Patch1001:      https://github.com/xbjfk/bcachefs/commit/5dc90d3e15db315dddb3fead5eab817027c4312c.patch
-
 %description
     The meta package for %{name}.
 
@@ -156,7 +154,6 @@ Patch1001:      https://github.com/xbjfk/bcachefs/commit/5dc90d3e15db315dddb3fea
     if ! grep -q "bcachefs/" "fs/Makefile"; then
         sed -i '/obj-$(CONFIG_BTRFS_FS).*+= btrfs\//a obj-$(CONFIG_BCACHEFS_FS) += bcachefs/' "fs/Makefile"
     fi
-    %patch -P 1001 -p1
 
     cp %{SOURCE1} .config
 
@@ -213,9 +210,9 @@ Patch1001:      https://github.com/xbjfk/bcachefs/commit/5dc90d3e15db315dddb3fea
     diff -u %{SOURCE1} .config || :
 
     %if %{_build_nv}
-    cd %{_builddir}/%{_nv_pkg}/kernel-open
-    %patch -P 10 -p1
-    cd ..
+        cd %{_builddir}/%{_nv_pkg}/kernel-open
+        %patch -P 10 -p1
+        cd ..
     %endif
 
 %build
