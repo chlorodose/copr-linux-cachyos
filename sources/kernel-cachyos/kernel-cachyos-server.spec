@@ -140,20 +140,23 @@ Patch2:         %{_patch_src}/misc/dkms-clang.patch
 Patch10:        %{_patch_src}/misc/nvidia/0001-Enable-atomic-kernel-modesetting-by-default.patch
 %endif
 
+Patch1001:      https://github.com/xbjfk/bcachefs/commit/5dc90d3e15db315dddb3fead5eab817027c4312c.patch
+
 %description
     The meta package for %{name}.
 
 %prep
-%setup -q %{?SOURCE10:-b 10} -n linux-%{_tarkver}
-rm -rf fs/bcachefs
-mkdir -p fs/bcachefs
-tar -C fs/bcachefs --zstd --strip-components=2 -xf "%{SOURCE1000}" "$(basename "%{SOURCE1000}" ".tar.zst")/libbcachefs"
-if ! grep -q "fs/bcachefs/Kconfig" "fs/Kconfig"; then
-    sed -i '/source "fs\/btrfs\/Kconfig"/a source "fs/bcachefs/Kconfig"' "fs/Kconfig"
-fi
-if ! grep -q "bcachefs/" "fs/Makefile"; then
-    sed -i '/obj-$(CONFIG_BTRFS_FS).*+= btrfs\//a obj-$(CONFIG_BCACHEFS_FS) += bcachefs/' "fs/Makefile"
-fi
+    %setup -q %{?SOURCE10:-b 10} -n linux-%{_tarkver}
+    rm -rf fs/bcachefs
+    mkdir -p fs/bcachefs
+    tar -C fs/bcachefs --zstd --strip-components=2 -xf "%{SOURCE1000}" "$(basename "%{SOURCE1000}" ".tar.zst")/libbcachefs"
+    if ! grep -q "fs/bcachefs/Kconfig" "fs/Kconfig"; then
+        sed -i '/source "fs\/btrfs\/Kconfig"/a source "fs/bcachefs/Kconfig"' "fs/Kconfig"
+    fi
+    if ! grep -q "bcachefs/" "fs/Makefile"; then
+        sed -i '/obj-$(CONFIG_BTRFS_FS).*+= btrfs\//a obj-$(CONFIG_BCACHEFS_FS) += bcachefs/' "fs/Makefile"
+    fi
+    %patch -P 1001 -p1
 
     cp %{SOURCE1} .config
 
@@ -209,11 +212,11 @@ fi
 
     diff -u %{SOURCE1} .config || :
 
-%if %{_build_nv}
-cd %{_builddir}/%{_nv_pkg}/kernel-open
-%patch -P 10 -p1
-cd ..
-%endif
+    %if %{_build_nv}
+    cd %{_builddir}/%{_nv_pkg}/kernel-open
+    %patch -P 10 -p1
+    cd ..
+    %endif
 
 %build
     %make_build EXTRAVERSION=-%{release}.%{_arch} all
