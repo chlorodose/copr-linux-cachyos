@@ -140,6 +140,8 @@ Patch2:         %{_patch_src}/misc/dkms-clang.patch
 Patch10:        %{_patch_src}/misc/nvidia/0001-Enable-atomic-kernel-modesetting-by-default.patch
 %endif
 
+Patch20:        https://github.com/chlorodose/bcachefs/commit/8d00b9bc2c30b05ca9464554fb96fbacac36234a.patch
+
 %description
     The meta package for %{name}.
 
@@ -154,6 +156,7 @@ Patch10:        %{_patch_src}/misc/nvidia/0001-Enable-atomic-kernel-modesetting-
     if ! grep -q "bcachefs/" "fs/Makefile"; then
         sed -i '/obj-$(CONFIG_BTRFS_FS).*+= btrfs\//a obj-$(CONFIG_BCACHEFS_FS) += bcachefs/' "fs/Makefile"
     fi
+    %patch -P 20 -p1
 
     cp %{SOURCE1} .config
 
