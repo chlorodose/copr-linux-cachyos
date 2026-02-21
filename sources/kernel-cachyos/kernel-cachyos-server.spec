@@ -140,7 +140,7 @@ Patch2:         %{_patch_src}/misc/dkms-clang.patch
 Patch10:        %{_patch_src}/misc/nvidia/0001-Enable-atomic-kernel-modesetting-by-default.patch
 %endif
 
-Patch20:        https://github.com/chlorodose/bcachefs/commit/8d00b9bc2c30b05ca9464554fb96fbacac36234a.patch
+Patch20:        https://gist.githubusercontent.com/chlorodose/ca5f30bef576da5dd425ad540d942788/raw/16aac3ace0e1e7a3c3c4f20ff973a6f0ca1d08a1/0001-Bcachefs-add-selinux-support.patch
 
 %description
     The meta package for %{name}.
